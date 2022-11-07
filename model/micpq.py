@@ -13,9 +13,9 @@ class PQ_head(nn.Module):
     The pq implementaion refers to SPQ(https://github.com/youngkyunJang/SPQ).
     """
     def __init__(self, N_words, N_books, L_word, gumbel_temp, dist_metric, sample_method = "gumbel_softmax"):
-        # N_words = K; number of codewords
-        # N_books = M; number of codebooks
-        # L_word = Dimension of the codebwords
+        # N_words = K; number of codewords  16
+        # N_books = M; number of codebooks  4
+        # L_word = Dimension of the codebwords  24
 
         super(PQ_head, self).__init__()
 
@@ -56,8 +56,11 @@ class PQ_head(nn.Module):
 
     def forward(self, X):
         # input shape: (bsz, N_books * L_word)
+        #(N_books,)
         x = torch.split(X, self.L_word, dim = 1) # tuple; ele of the tuple has the shape like (bath_size, L_word)。 N_books element
         c = torch.split(self.C, self.L_word, dim = 1) # tuple; ele of the tuple has the shape like (N_words, L_word)。 N_books elements.
+        print(x[0].shape)
+        assert 1==2
         prob_list = []
         for i in range(self.N_books):
             logits = self.defined_sim(x[i], c[i])
@@ -156,12 +159,13 @@ class MICPQ(Base_Model):
         
 
     def forward(self, inputs):
+        #(batch,L_word*N_book)
         embd_0 = self.pro_layer(self.get_embeddings(inputs, pooling=self.hparams.pooler_type))
         embd_1 = self.pro_layer(self.get_embeddings(inputs, pooling=self.hparams.pooler_type))
-
+        #Q:(batch,L_word*N_book)
+        #prob_list:(N_book,N_word)
         Q_0, prob0_list = self.pq_head(embd_0)
         Q_1, prob1_list = self.pq_head(embd_1)
-
         codebooks_losses = []
         for i in range(len(prob0_list)):
             prob0 = prob0_list[i]
