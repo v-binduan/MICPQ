@@ -8,6 +8,7 @@ from copy import deepcopy
 from datetime import timedelta
 from collections import OrderedDict
 from timeit import default_timer as timer
+from tqdm import tqdm
 
 from utils.logger import Logger
 from utils.data import LabeledDocuments
@@ -102,7 +103,7 @@ class Base_Model(nn.Module):
 
                 forward_sum = {}
                 num_steps = 0
-                for batch_num, batch in enumerate(train_loader):
+                for batch_num, batch in tqdm(enumerate(train_loader),total=len(train_loader),desc="epoch {}".format(epoch)):
                     optimizer.zero_grad()
 
                     inputs = squeeze_dim(
