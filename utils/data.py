@@ -47,6 +47,8 @@ class LabeledDocuments(Data):
             encoding="utf-8",
         )
 
+        rows=rows[:500]
+        
         label_fn = label_fn if label_fn is not None else (lambda x: x)
         labels = rows[0].apply(lambda x: label_fn(x))
         sentences = rows[1]

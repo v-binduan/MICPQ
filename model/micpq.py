@@ -55,14 +55,18 @@ class PQ_head(nn.Module):
 
 
     def forward(self, X):
-        # input shape: (bsz, N_books * L_word)
-        #(N_books,)
+        # N_words = K; number of codewords  16
+        # N_books = M; number of codebooks  4
+        # L_word = Dimension of the codebwords  24
+        #(batch, N_books * L_word)
+        #(M,batch,L_word)
+        #(4,64,24)
         x = torch.split(X, self.L_word, dim = 1) # tuple; ele of the tuple has the shape like (bath_size, L_word)。 N_books element
+        #(4,16,24)
         c = torch.split(self.C, self.L_word, dim = 1) # tuple; ele of the tuple has the shape like (N_words, L_word)。 N_books elements.
-        print(x[0].shape)
-        assert 1==2
         prob_list = []
         for i in range(self.N_books):
+            #(batch,N_word)
             logits = self.defined_sim(x[i], c[i])
             
             if self.sample_method == "softmax":
@@ -159,10 +163,10 @@ class MICPQ(Base_Model):
         
 
     def forward(self, inputs):
-        #(batch,L_word*N_book)
+        #(batch,L_word*M)
         embd_0 = self.pro_layer(self.get_embeddings(inputs, pooling=self.hparams.pooler_type))
         embd_1 = self.pro_layer(self.get_embeddings(inputs, pooling=self.hparams.pooler_type))
-        #Q:(batch,L_word*N_book)
+        #Q:(batch,L_word*M)
         #prob_list:(N_book,N_word)
         Q_0, prob0_list = self.pq_head(embd_0)
         Q_1, prob1_list = self.pq_head(embd_1)
