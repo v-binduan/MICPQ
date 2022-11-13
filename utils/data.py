@@ -39,7 +39,7 @@ class LabeledDocuments(Data):
         rows = pd.read_csv(
             path,
             sep=",",
-            error_bad_lines='skip',
+            error_bad_lines=True,
             header=None,
             skiprows=None,
             quoting=0,
